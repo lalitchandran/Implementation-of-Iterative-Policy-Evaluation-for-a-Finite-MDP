@@ -206,33 +206,7 @@ env.close()
 ## Output
 
 ```text
-The program prints the number of states and actions, the convergence iteration count, and the estimated value of each state.
-
-The numerical values and number of iterations are calculated when the notebook is executed. Because the program uses the specified environment, policy, discount factor, and convergence threshold, the output should follow this format:
-
-Number of States: 16
-Number of Actions: 4
-Actions: 0=Left, 1=Down, 2=Right, 3=Up
-
-Name: S LALIT CHANDRAN
-Register Number: 212223240077
-Discount Factor (gamma): 0.99
-Convergence Threshold (theta): 1e-08
-Number of Iterations: <calculated during execution>
-
-State-Value Function (16 states):
-<16 calculated state values>
-
-State-Value Function as a 4x4 Grid:
-<calculated 4x4 value grid>
-
-Grid with tile labels and state values:
-S = Start, F = Frozen, H = Hole, G = Goal
-<tile labels and corresponding calculated values>
-
-Note: The placeholders above are intentional; the exact iteration count and numerical state values should be copied from the actual output after running the program in Google Colab. They should not be guessed.
-
-
+<img width="772" height="385" alt="image" src="https://github.com/user-attachments/assets/fe7c223e-bbbc-47f1-9b0d-20cdad998f58" />
 
 ```
 ---
