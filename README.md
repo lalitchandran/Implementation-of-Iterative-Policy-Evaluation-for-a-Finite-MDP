@@ -99,30 +99,138 @@ Where:
 ## Program
 
 ```python
-
-
 # -------------------------------------------------
-# Policy Evaluation Function
+# Iterative Policy Evaluation for FrozenLake-v1
 # -------------------------------------------------
 
+import gymnasium as gym
+import numpy as np
+
+# Create the FrozenLake environment
+env = gym.make("FrozenLake-v1", map_name="4x4", is_slippery=True)
+env_model = env.unwrapped
+
+n_states = env_model.observation_space.n
+n_actions = env_model.action_space.n
+
+print("Number of States:", n_states)
+print("Number of Actions:", n_actions)
+print("Actions: 0=Left, 1=Down, 2=Right, 3=Up")
+
+# Parameters
+gamma = 0.99
+theta = 1e-8
+
+# Fixed random policy: each action has equal probability
+policy = np.ones((n_states, n_actions)) / n_actions
+
+
+def policy_evaluation(env, policy, gamma=0.99, theta=1e-8):
+    """Estimate V_pi(s) using iterative policy evaluation."""
+    n_states = env.observation_space.n
+    n_actions = env.action_space.n
+
+    V = np.zeros(n_states, dtype=float)
+    iteration = 0
+
+    while True:
+        delta = 0.0
+        iteration += 1
+
+        for state in range(n_states):
+            old_value = V[state]
+            new_value = 0.0
+
+            for action in range(n_actions):
+                action_probability = policy[state, action]
+
+                # Each transition is:
+                # (probability, next_state, reward, terminated)
+                for probability, next_state, reward, terminated in env.P[state][action]:
+                    future_value = 0.0 if terminated else V[next_state]
+
+                    new_value += action_probability * probability * (
+                        reward + gamma * future_value
+                    )
+
+            V[state] = new_value
+            delta = max(delta, abs(old_value - new_value))
+
+        # Stop when the value function has converged
+        if delta < theta:
+            break
+
+    return V, iteration
+
+
+# Run iterative policy evaluation
+V, iterations = policy_evaluation(
+    env_model,
+    policy,
+    gamma=gamma,
+    theta=theta
+)
 
 # -------------------------------------------------
 # Display Output
 # -------------------------------------------------
 
-# Change the parameters and observe the results
+print("\\nName: __________________________")
+print("Register Number: _______________")
+print("Discount Factor (gamma):", gamma)
+print("Convergence Threshold (theta):", theta)
+print("Number of Iterations:", iterations)
 
+print("\\nState-Value Function (16 states):")
+print(np.round(V, 6))
+
+print("\\nState-Value Function as a 4x4 Grid:")
+print(np.round(V.reshape(4, 4), 4))
+
+# Display each map tile with its value
+print("\\nGrid with tile labels and state values:")
+print("S = Start, F = Frozen, H = Hole, G = Goal")
+desc = env_model.desc.astype("U1")
+
+for row in range(4):
+    row_text = []
+    for col in range(4):
+        state = row * 4 + col
+        row_text.append(f"{desc[row, col]}:{V[state]:.4f}")
+    print("  ".join(row_text))
+
+env.close()
 ```
-
 ---
 
 ## Output
 
 ```text
+The program prints the number of states and actions, the convergence iteration count, and the estimated value of each state.
 
-Number of Iterations: 
+The numerical values and number of iterations are calculated when the notebook is executed. Because the program uses the specified environment, policy, discount factor, and convergence threshold, the output should follow this format:
 
-State-Value Function as 4x4 Grid:
+Number of States: 16
+Number of Actions: 4
+Actions: 0=Left, 1=Down, 2=Right, 3=Up
+
+Name: S LALIT CHANDRAN
+Register Number: 212223240077
+Discount Factor (gamma): 0.99
+Convergence Threshold (theta): 1e-08
+Number of Iterations: <calculated during execution>
+
+State-Value Function (16 states):
+<16 calculated state values>
+
+State-Value Function as a 4x4 Grid:
+<calculated 4x4 value grid>
+
+Grid with tile labels and state values:
+S = Start, F = Frozen, H = Hole, G = Goal
+<tile labels and corresponding calculated values>
+
+Note: The placeholders above are intentional; the exact iteration count and numerical state values should be copied from the actual output after running the program in Google Colab. They should not be guessed.
 
 
 
@@ -139,7 +247,19 @@ Iterative policy evaluation was implemented successfully using the Gymnasium Fro
 
 ```text
 
+Iterative policy evaluation estimates how good each state is when the agent follows the specified fixed policy.
 
+States with more favorable expected routes to the goal generally have higher values.
+
+States near holes or with less favorable routes generally have lower values.
+
+Because is_slippery=True, the environment has stochastic transitions, which are included in the calculation through env.P[state][action].
+
+The random policy selects every action with equal probability, so it does not intentionally prefer the safest or shortest route.
+
+The estimated values depend on the policy, transition model, discount factor, and convergence threshold.
+
+These values describe the selected random policy; they are not the optimal state values.
 
 ```
 
